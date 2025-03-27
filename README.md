@@ -128,3 +128,36 @@ This is the place for you to write reflections:
    This approach maintains Rust's promise of thread safety while still allowing us to have globally accessible, mutable state when needed.
 
 #### Reflection Subscriber-2
+
+1. **Exploring Code Outside the Tutorial Steps:**
+
+   Yes, I explored additional code outside the tutorial steps, particularly `src/lib.rs`, which provided valuable insights into the application structure. This file contains the core bootstrapping logic and configuration management through the `AppConfig` struct, which handles environment variables and app-wide constants like `REQWEST_CLIENT`.
+
+   Examining this code helped me understand how the application's configuration is centralized and loaded from the `.env` file, and how the HTTP client is instantiated as a singleton. I also discovered the custom error handling system that's used throughout the application, which wraps errors in a consistent format for API responses.
+
+   This exploration was particularly useful when debugging connection issues between the Publisher and Receiver, as it revealed how URLs are constructed and how the application identity is maintained across different instances.
+
+2. **Observer Pattern and Scalability:**
+
+   The Observer pattern significantly simplifies adding new subscribers to the system. When spawning multiple instances of the Receiver app on different ports, each instance can independently subscribe to product types of interest without any changes needed in the Publisher app. This demonstrates the pattern's strength in providing loose coupling between publishers and subscribers.
+
+   The Publisher doesn't need to know anything about the implementation details of its subscribers - it only needs to maintain a list of subscriber endpoints and notify them when events occur. This decoupling allows the system to scale horizontally with minimal coordination overhead.
+
+   However, scaling the Publisher side would be more challenging. If we wanted to run multiple Publisher instances, we would need additional infrastructure like a shared database or message queue to ensure that subscriber registrations are propagated across all Publisher instances. The current implementation stores subscribers in memory using `lazy_static`, which doesn't automatically synchronize across multiple application instances.
+
+   To support multiple Publishers, we would need to implement a more sophisticated subscription management system, possibly using a distributed data store or service discovery mechanism.
+
+3. **Testing and Documentation:**
+
+   I enhanced the Postman collection with pre-request scripts to automatically set environment variables, which simplified testing across different subscriber instances. The tests verify successful notification reception and proper display formatting.
+
+   These testing enhancements proved extremely valuable for:
+
+   - Validating the correct handling of different notification types (creation, promotion, deletion)
+   - Ensuring that notifications are properly formatted in the receiver's display
+   - Testing edge cases like unsubscribing and re-subscribing to the same product type
+   - Verifying that multiple receiver instances can coexist without interference
+
+   Additionally, I documented expected response formats and potential error states in the Postman collection, which served as living documentation for the API. This became particularly useful when troubleshooting integration issues between the Publisher and Receiver applications.
+
+   For my group project, I plan to incorporate these testing practices early in development to catch integration issues before they propagate throughout the system.
