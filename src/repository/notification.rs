@@ -1,6 +1,8 @@
-use crate::model::notification::Notification;
-use lazy_static::lazy_static;
 use std::sync::RwLock;
+
+use lazy_static::lazy_static;
+
+use crate::model::notification::Notification;
 
 // Singleton of Database
 lazy_static! {
